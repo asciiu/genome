@@ -23,10 +23,11 @@ object GeneticAlgorithm {
 
       for (x <- pool.length-1 to 0 by -2) {
         val n1 = selectMember(pool)
-        val n2 = selectMember(pool)
+        var n2 = selectMember(pool)
 
         // cross over and mutate
-        n1.crossOver(n2)
+        n2 = n1.crossOver(n2)
+
         n1.mutate
         n2.mutate
 
@@ -34,12 +35,12 @@ object GeneticAlgorithm {
         n2.scoreChromo
 
         if (n1.total == target && n1.isValid) {
-          println(s"target: $target generations: $gen solution: ${n1.decodeChromo}")
+          println(s"generations: $gen solution: ${n1.decodeChromo} total:${n1.total}")
           solutionFound = true
         }
 
         if (n2.total == target && n2.isValid) {
-          println(s"target: $target generations: $gen solution: ${n2.decodeChromo}")
+          println(s"generations: $gen solution: ${n2.decodeChromo} total:${n2.total}")
           solutionFound = true
         }
 
@@ -75,7 +76,14 @@ object GeneticAlgorithm {
   }
 
   def main(args: Array[String]): Unit = {
-    evolve(13)
+
+    var input = 0
+    do {
+      print("Enter a target (Int): ")
+      input = scala.io.StdIn.readInt()
+
+      evolve(input)
+    } while (input != 0)
     // valid expression is Num op Num
     // therefore the expression is valid in cases where there are at least 2 nums and
     // a single op

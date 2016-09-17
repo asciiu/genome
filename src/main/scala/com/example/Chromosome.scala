@@ -15,7 +15,7 @@ class Chromosome(target: Int, chromoLen: Int) {
   val chromo = new StringBuffer(chromoLen*4)
   //val decodeChromo = new StringBuffer(chromoLen*4)
   var score = 0.0
-  var total = 0
+  var total = 0.0
 
   randomInit
   scoreChromo
@@ -37,9 +37,15 @@ class Chromosome(target: Int, chromoLen: Int) {
   }
 
   def scoreChromo = {
-    total = addUp
-    if (total == target) score = 0
-    else score = 1.0 / (target - total)
+
+    if (isValid) {
+      total = addUp
+      if (total == target) score = 0.0
+      else score = 1.0 / (target - total)
+    } else {
+      total = 0
+      score = 0.0
+    }
   }
 
   def decodeChromo: String = {
@@ -54,54 +60,45 @@ class Chromosome(target: Int, chromoLen: Int) {
   }
 
   // TODO this needs to be fixed to honor the order of operations
-  def addUp: Int = {
-    def charToDigit(char: Char): Int = {
-      char-'0'.toInt
-    }
-
-    val decodedString = decodeChromo
-
+  def addUp: Double = {
     if (isValid) {
-      // find the first number
-      decodedString.find(c => c.isDigit) match {
-        case Some(c) =>
-          val index = decodedString.indexOf(c) + 1
-          var total = c - '0'.toInt
-          var nextNum = false
-          var op = " "
 
-          for (i <- index to decodedString.length - 1) {
+      val decodedString = decodeChromo
+      val ops = decodedString.filter( !_.isDigit )
+      val nums = decodedString.filter( _.isDigit ).map( _.toDouble - 48.0 )
 
-            val ch = decodedString(i)
+      ops match {
+        case "**" => nums(0) * nums(1) * nums(2)
+        case "*/" => nums(0) * nums(1) / nums(2)
+        case "*+" => nums(0) * nums(1) + nums(2)
+        case "*-" => nums(0) * nums(1) - nums(2)
+        case "*" => nums(0) * nums(1)
 
-            // look for the next operator
-            if (!nextNum && !ch.isDigit) {
-              op = ch.toString
-              nextNum = true
-            } else if (nextNum && ch.isDigit) {
+        case "//" => nums(0) / nums(1) / nums(2)
+        case "/*" => nums(0) / nums(1) * nums(2)
+        case "/+" => nums(0) / nums(1) + nums(2)
+        case "/-" => nums(0) / nums(1) - nums(2)
+        case "/" => nums(0) / nums(1)
 
-              val dig = charToDigit(ch)
-              op match {
-                case "+" => total += dig
-                case "-" => total -= dig
-                case "*" => total *= dig
-                case "/" if dig != 0 => (total / dig)
-                case _ =>
-              }
-              nextNum = false
-            }
+        case "++" => nums(0) + nums(1) + nums(2)
+        case "+*" => nums(0) + nums(1) * nums(2)
+        case "+/" => nums(0) + nums(1) / nums(2)
+        case "+-" => nums(0) + nums(1) - nums(2)
+        case "+" => nums(0) + nums(1)
 
-          }
-          total
-
-        case None => 0
+        case "--" => nums(0) - nums(1) - nums(2)
+        case "-*" => nums(0) - nums(1) * nums(2)
+        case "-/" => nums(0) - nums(1) / nums(2)
+        case "-+" => nums(0) - nums(1) + nums(2)
+        case "-" => nums(0) - nums(1)
+        case _ if nums.length > 0 => nums(0)
       }
     } else {
       0
     }
   }
 
-  def crossOver(other: Chromosome): Unit = {
+  def crossOver(other: Chromosome): Chromosome = {
     if (Random.nextDouble() < crossOverRate) {
       val pos = Random.nextInt(chromo.length-1)
       val substr1 = chromo.substring(pos)
@@ -109,6 +106,8 @@ class Chromosome(target: Int, chromoLen: Int) {
       chromo.replace(pos, chromo.length, substr2)
       other.chromo.replace(pos, chromo.length, substr1)
     }
+
+    other
   }
 
   def mutate = {
@@ -121,26 +120,19 @@ class Chromosome(target: Int, chromoLen: Int) {
   }
 
   def isValid: Boolean = {
-    val decodeStr = decodeChromo
+    val str = decodeChromo
+    if (str.length != 5) false
+    else {
 
-    var num = true
-    var valid = true
-    var i = 0
-
-    do {
-      val c = decodeStr(i)
-      // must be num-op-num-op-num
-      if (num == !c.isDigit) valid = false
-
-      if (i > 0 && c == '0' && decodeStr(i-1) == '/') valid = false
-
-      num = !num
-      i += 1
-    } while (valid && i < decodeStr.length)
-
-    if (!decodeStr.last.isDigit) valid = false
-
-    valid
+      var valid = true
+      if (str(0).isDigit && !str(1).isDigit && str(2).isDigit && !str(3).isDigit && str(4).isDigit) {
+        if (str(1) == '/') valid = str(2) != '0'
+        if (str(3) == '/' && valid) valid = str(4) != '0'
+      } else {
+        valid = false
+      }
+      valid
+    }
   }
 }
 //final class Chromosome[T <: Gene](val code: List[T]) {
