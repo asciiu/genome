@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/genetic-alg.iml" filepath="$PROJECT_DIR$/.idea/modules/genetic-alg.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/genetic-alg-build.iml" filepath="$PROJECT_DIR$/.idea/modules/genetic-alg-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/genome.iml" filepath="$PROJECT_DIR$/.idea/modules/genome.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/genome-build.iml" filepath="$PROJECT_DIR$/.idea/modules/genome-build.iml" />
     </modules>
   </component>
 </project>

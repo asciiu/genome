@@ -1,4 +1,4 @@
-package com.example
+package com.genome
 
 import scala.util.Random
 

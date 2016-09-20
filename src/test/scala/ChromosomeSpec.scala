@@ -1,4 +1,4 @@
-import com.example.Chromosome
+import com.genome.Chromosome
 import org.scalatest._
 
 class ChromosomeSpec extends FlatSpec with Matchers {

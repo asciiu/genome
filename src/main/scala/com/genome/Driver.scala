@@ -1,4 +1,4 @@
-package com.example
+package com.genome
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
@@ -155,15 +155,12 @@ object GeneticAlgorithm {
 
   def main(args: Array[String]): Unit = {
 
-  //  var input = 0
-  //  do {
-  //    print("Enter a target (Int): ")
-  //    input = scala.io.StdIn.readInt()
+    var input = 0
+    do {
+      print("Enter a target (Int): ")
+      input = scala.io.StdIn.readInt()
 
-  //    evolve(input)
-  //  } while (input != 0)
-    // valid expression is Num op Num
-    // therefore the expression is valid in cases where there are at least 2 nums and
-    // a single op
+      evolve(input)
+    } while (input != 0)
   }
 }
