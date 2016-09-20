@@ -10,20 +10,28 @@ class Chromosome(length: Int)(implicit code: Array[Char]) {
   val genes = new StringBuffer(length*4)
 
   // Randomly generate genes for this chromosome
-  for (y <- 0 to length) {
+  0 until length foreach { _ =>
     val random = Random.nextInt(code.length)
-    val binString = Integer.toBinaryString(random)
-    val fillLen = 4 - binString.length
-
-    for (x <- 0 to fillLen - 1) {
-      genes.append('0')
-    }
+    val binString = "%4s".format(Integer.toBinaryString(random)).replace(' ', '0')
     genes.append(binString)
+  }
+
+  def this(genes: String)(implicit code: Array[Char]) {
+    this(genes.length)
+    this.genes.delete(0, this.genes.length)
+
+    for (gene <- genes) {
+      val index = code.indexOf(gene)
+      if (index > -1) {
+        val binString = "%4s".format(Integer.toBinaryString(index)).replace(' ', '0')
+        this.genes.append(binString)
+      }
+    }
   }
 
   override def toString(): String = {
     val buffer = new StringBuffer(length*4)
-    for (x <- 0 to genes.length-5 by 4) {
+    for (x <- 0 to genes.length-4 by 4) {
       val gene = genes.substring(x, x+4)
 
       val idx = Integer.parseInt(gene, 2)
