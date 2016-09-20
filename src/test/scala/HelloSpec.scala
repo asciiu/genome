@@ -1,7 +1,14 @@
+import com.example.Chromosome
 import org.scalatest._
 
-class HelloSpec extends FlatSpec with Matchers {
-  "Hello" should "have tests" in {
+class ChromosomeSpec extends FlatSpec with Matchers {
+
+  "new Chromosome" should "have tests" in {
+
+    implicit val code = Array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '*', '/')
+    val chromo = new Chromosome(5)
+    println(chromo.toString())
+    
     true should === (true)
   }
 }
