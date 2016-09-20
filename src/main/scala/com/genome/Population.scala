@@ -1,50 +1,97 @@
 package com.genome
 
-/**
-  * Created by bishop on 9/14/16.
-  */
-//type Pool[T <: Gene] = ArrayBuffer[Chromosome[T]]
-//
-//class Population[T <: Gene](
-//                             limit: Int,
-//                             val chromosomes: Pool[T]) {
-//
-//  // selection operator
-//  def select(score: Chromosome[T] => Unit, cutOff: Double) = {
-//    val cumul = chromosomes./:(0.0)(
-//      (s,x) =>{ score(xy); s + xy. unfitness}
-//    )
-//
-//    chromosomes foreach( _ /= cumul)
-//    // orders the population by decreasing value
-//    val newChromosomes = chromosomes.sortWith(_.unfitness < _.unfitness)
-//    // applies a soft limit function on population growth, cutOff
-//    val cutOffSize = (cutOff*newChromosomes.size).floor.toInt
-//    // reduces the size of the population to the lowest of the two limits:
-//    // the hard limit, limit, or the soft limit,cutOffSize
-//    val newPopSize = if(limit<cutOffSize) limit else cutOffSize
-//
-//    chromosomes.clear
-//    chromosomes ++= newChromosomes.take(newPopSize)
-//  }
-//
-//  // cross-over operator
-//  def +- (xOver: Double): Unit = {
-//    if( size > 1) {
-//      val mid = size>>1
-//      val bottom = chromosomes.slice(mid, size)
-//
-//      val gIdx = geneticIndices(xOver)
-//      val offSprings = chromosomes.take(mid)
-//        .zip(bottom)
-//        .map(p => p._1 +-(p._2, gIdx))
-//        .unzip
-//
-//      chromosomes ++= offSprings._1 ++ offSprings._2
-//    }
-//  }
-//
-//  // mutation operator
-//  def ^ (mu: Double)
-//  // ...
-//}
+import scala.collection.mutable.ArrayBuffer
+import scala.util.Random
+
+
+class Population(size: Int) {
+  val pool = ArrayBuffer.empty[Chromosome]
+
+  // TODO this doesn't belong
+  val crossOverRate = 0.7
+  val mutationRate = 0.001
+  val chromoLength = 5
+  implicit val code = Array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '*', '/')
+  for (x <- 0 until size) pool.append(new Chromosome(chromoLength))
+
+  /**
+    * Performs the simple selection algorithm on
+    * the population.
+    *
+    * @param target
+    * @return the number of generations
+    */
+  def evolve(target: Double): Int = {
+    val newPool = ArrayBuffer.empty[Chromosome]
+    var solutionFound = false
+    var gen = 0
+
+    while (!solutionFound) {
+      do {
+        val n1 = selectMember(target)
+        var n2 = selectMember(target)
+
+        // cross over and mutate
+        n2 = n1.crossOver(n2, crossOverRate)
+        n1.mutate(mutationRate)
+        n2.mutate(mutationRate)
+
+        val total1 = Fitness.computeValue(n1)
+        val total2 = Fitness.computeValue(n2)
+
+        if (total1.isDefined && total1.get == target) {
+          println(s"generations: $gen solution: $n1 total:${total1}")
+          solutionFound = true
+        }
+
+        if (total2.isDefined && total2.get == target) {
+          println(s"generations: $gen solution: $n2 total:${total2}")
+          solutionFound = true
+        }
+
+        newPool.append(n1, n2)
+
+      } while(!solutionFound && newPool.length < pool.length)
+
+      pool.clear()
+      pool.appendAll(newPool)
+      newPool.clear()
+      gen += 1
+    }
+
+    gen
+  }
+
+  /**
+    * Select a member from this population. Uses
+    * a predefined target number to assess the fitness score.
+    *
+    * @param target
+    * @return
+    */
+  def selectMember(target: Double): Chromosome = {
+    val totalFitness = pool.foldLeft(0.0)((a, c) => Fitness.score(c, target))
+    val slice = totalFitness * Random.nextDouble()
+
+    var ttot = 0.0
+    var node = pool.last
+
+    var found = false
+    var i = pool.length - 1
+
+    while (!found && i > 0) {
+      val chromo = pool(i)
+      ttot += Fitness.score(chromo, target)
+
+      if (ttot > slice) {
+        pool.remove(i)
+        node = chromo
+        found = true
+      }
+      i -= 1
+    }
+
+    if (pool.length > 0 && !found) pool.remove(pool.length - 1)
+    node
+  }
+}
