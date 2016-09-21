@@ -26,6 +26,8 @@ class ChromosomeSpec extends FlatSpec with Matchers {
     val chromo1 = new Chromosome(chrosomeLength)
     val chromo2 = new Chromosome(chrosomeLength)
 
+    chromo1.crossOver(chromo2, 1)
+
     // TODO
     assert(true)
   }

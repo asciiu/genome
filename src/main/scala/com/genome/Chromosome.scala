@@ -7,7 +7,7 @@ import scala.util.Random
   * that engeness the genes.
   */
 class Chromosome(length: Int)(implicit code: Array[Char]) {
-  val genes = new StringBuffer(length*4)
+  private val genes = new StringBuffer(length*4)
 
   // Randomly generate genes for this chromosome
   0 until length foreach { _ =>
@@ -40,16 +40,15 @@ class Chromosome(length: Int)(implicit code: Array[Char]) {
     buffer.toString
   }
 
-  def crossOver(other: Chromosome, rate: BigDecimal): Chromosome = {
+  def crossOver(other: Chromosome, rate: BigDecimal) = {
     if (Random.nextDouble() < rate) {
       val pos = Random.nextInt(genes.length-1)
+
       val substr1 = genes.substring(pos)
       val substr2 = other.genes.substring(pos)
       genes.replace(pos, genes.length, substr2)
       other.genes.replace(pos, genes.length, substr1)
     }
-
-    other
   }
 
   def mutate(rate: BigDecimal) = {

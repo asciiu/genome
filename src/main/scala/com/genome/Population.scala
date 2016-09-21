@@ -22,39 +22,33 @@ class Population(size: Int) {
     * @return the number of generations
     */
   def evolve(target: Double): Int = {
-    val newPool = ListBuffer.empty[Chromosome]
     var solutionFound = false
     var gen = 0
 
     while (!solutionFound) {
-      do {
-        val n1 = selectMember(target)
-        var n2 = selectMember(target)
+      val n1 = selectMember(target)
+      var n2 = selectMember(target)
 
-        // cross over and mutate
-        n2 = n1.crossOver(n2, crossOverRate)
-        n1.mutate(mutationRate)
-        n2.mutate(mutationRate)
+      // cross over and mutate
+      n1.crossOver(n2, crossOverRate)
+      n1.mutate(mutationRate)
+      n2.mutate(mutationRate)
 
-        val total1 = Fitness.computeValue(n1)
-        val total2 = Fitness.computeValue(n2)
+      val total1 = Fitness.computeValue(n1)
+      val total2 = Fitness.computeValue(n2)
 
-        if (total1.isDefined && total1.get == target) {
-          stdout(n1.toString, gen)
-          solutionFound = true
-        }
+      if (total1.isDefined && total1.get == target) {
+        stdout(n1.toString, gen)
+        solutionFound = true
+      }
 
-        if (total2.isDefined && total2.get == target) {
-          stdout(n2.toString, gen)
-          solutionFound = true
-        }
+      if (total2.isDefined && total2.get == target) {
+        stdout(n2.toString, gen)
+        solutionFound = true
+      }
 
-        newPool.append(n1, n2)
+      pool.append(n1, n2)
 
-      } while(!solutionFound && pool.length > 0)
-
-      pool.appendAll(newPool)
-      newPool.clear()
       gen += 1
     }
 
@@ -69,6 +63,7 @@ class Population(size: Int) {
   /**
     * Select a member from this population. Uses
     * a predefined target number to assess the fitness score.
+    * This will remove the chromsome from the population pool.
     *
     * @param target
     * @return
