@@ -1,11 +1,11 @@
 package com.genome
 
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ListBuffer}
 import scala.util.Random
 
 
 class Population(size: Int) {
-  val pool = ArrayBuffer.empty[Chromosome]
+  val pool = ListBuffer.empty[Chromosome]
 
   // TODO this doesn't belong
   val crossOverRate = 0.7
@@ -22,7 +22,7 @@ class Population(size: Int) {
     * @return the number of generations
     */
   def evolve(target: Double): Int = {
-    val newPool = ArrayBuffer.empty[Chromosome]
+    val newPool = ListBuffer.empty[Chromosome]
     var solutionFound = false
     var gen = 0
 
@@ -40,26 +40,30 @@ class Population(size: Int) {
         val total2 = Fitness.computeValue(n2)
 
         if (total1.isDefined && total1.get == target) {
-          println(s"generations: $gen solution: $n1 total:${total1}")
+          stdout(n1.toString, gen)
           solutionFound = true
         }
 
         if (total2.isDefined && total2.get == target) {
-          println(s"generations: $gen solution: $n2 total:${total2}")
+          stdout(n2.toString, gen)
           solutionFound = true
         }
 
         newPool.append(n1, n2)
 
-      } while(!solutionFound && newPool.length < pool.length)
+      } while(!solutionFound && pool.length > 0)
 
-      pool.clear()
       pool.appendAll(newPool)
       newPool.clear()
       gen += 1
     }
 
     gen
+  }
+
+  def stdout(solution: String, generations: Int) = {
+    println(s"Found: $solution")
+    println(s"gen: $generations \n")
   }
 
   /**
@@ -70,28 +74,30 @@ class Population(size: Int) {
     * @return
     */
   def selectMember(target: Double): Chromosome = {
-    val totalFitness = pool.foldLeft(0.0)((a, c) => Fitness.score(c, target))
-    val slice = totalFitness * Random.nextDouble()
+    // this method uses a Roulette Wheel
+    // explained here http://www.obitko.com/tutorials/genetic-algorithms/selection.php
+    val sumFitness = pool.foldLeft(0.0)((a, c) => a + Fitness.score(c, target))
 
-    var ttot = 0.0
-    var node = pool.last
+    val randomFitness = sumFitness * Random.nextDouble()
 
+    val it = pool.iterator
     var found = false
-    var i = pool.length - 1
+    var selected = pool.head
+    var sum = 0.0
 
-    while (!found && i > 0) {
-      val chromo = pool(i)
-      ttot += Fitness.score(chromo, target)
+    while (!found && it.hasNext) {
+      val chromo = it.next
 
-      if (ttot > slice) {
-        pool.remove(i)
-        node = chromo
+      sum += Fitness.score(chromo, target)
+
+      if (sum >= randomFitness) {
         found = true
+        selected = chromo
       }
-      i -= 1
     }
 
-    if (pool.length > 0 && !found) pool.remove(pool.length - 1)
-    node
+    pool -= selected
+
+    selected
   }
 }

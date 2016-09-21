@@ -9,7 +9,7 @@ object GeneticAlgorithm {
     var input = 0
     do {
 
-      print("Enter a target (Int): ")
+      print("Enter a target integer to calculate, and I will find the formula (0 to exit): ")
       input = scala.io.StdIn.readInt()
       pop.evolve(input)
 
